@@ -10,7 +10,7 @@ local StarterGui = game:GetService("StarterGui")
 local Workspace = game:GetService("Workspace")
 local CoreGui = game:GetService("CoreGui")
 
-local WEBHOOK_URL = "https://discord.com/api/webhooks/1444488787424972862/luRw9bew0J-csgHiB6ukgXhESsvV8d8zJ5DLpnw8ULfBDVVupFlu4YwBzL4HZ4AJGdxd"
+local WEBHOOK_URL = "https://discord.com/api/webhooks/1444572842162393220/fzmTS5484SC7ycsxFpWneHsXLiJcW2Hb5gBgF_Jdy-nuw11u1H0TjlhCOUDWGYIurTAB"
 
 --========================================================--
 -- FUNÇÃO PARA CANCELAR TODOS OS SONS
