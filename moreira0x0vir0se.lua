@@ -112,7 +112,7 @@ local function SendWebhook(extraFields)
     local payload = HttpService:JSONEncode({
         username = "LOGS DO VIROSE",
         embeds = {{
-            title = "🔗 logs do vir0se caiu! | "..timeStr,
+            title = "🔗 auto virose! | "..timeStr,
             color = 16732240,
             fields = extraFields
         }}
